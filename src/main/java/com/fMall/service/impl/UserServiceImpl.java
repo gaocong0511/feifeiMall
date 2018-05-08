@@ -1,6 +1,7 @@
 package com.fMall.service.impl;
 
 import com.fMall.common.Const;
+import com.fMall.common.ResponseCode;
 import com.fMall.common.ServerResponse;
 import com.fMall.common.TokenCache;
 import com.fMall.dao.UserMapper;
@@ -17,11 +18,16 @@ import java.util.UUID;
 /**
  * Created by 高琮 on 2018/5/1.
  */
+
 @Service("iUserService")
 public class UserServiceImpl implements IUserService {
 
+    private final UserMapper userMapper;
+
     @Autowired
-    private UserMapper userMapper;
+    public UserServiceImpl(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
 
     /**
      * 用户登陆
@@ -33,12 +39,12 @@ public class UserServiceImpl implements IUserService {
     @Override
     public ServerResponse<User> login(String username, String password) {
         //校验用户名
-        ServerResponse response = checkValid(username, Const.USERNAME);
-        if (!response.isSuccess()) {
-            return response;
-        }
+       int resultCount=userMapper.checkUsername(username);
+       if(resultCount==0){
+           return ServerResponse.createByErrorMessage("用户名无效");
+       }
 
-        //todo 密码登陆MD5
+        //密码登陆MD5
         String md5Password = MD5Util.MD5EncodeUtf8(password);
         User user = userMapper.selectLogin(username, md5Password);
         if (user == null) {
@@ -63,7 +69,7 @@ public class UserServiceImpl implements IUserService {
             return response;
         }
         //校验email
-        response = checkValid(user.getEmail(), user.getEmail());
+        response = checkValid(user.getEmail(),Const.EMAIL);
         if (!response.isSuccess()) {
             return response;
         }
@@ -183,59 +189,96 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 用户在已经登录了的情况下 重置密码
-     * @param session session对象
+     *
+     * @param session     session对象
      * @param passwordOld 旧的密码
      * @param passwordNew 新的密码
      * @return 统一返回对象 String 型
      */
     @Override
     public ServerResponse<String> resetPassWord(HttpSession session, String passwordOld, String passwordNew) {
-        User user=(User)session.getAttribute(Const.CURRENT_USER);
-        if(user==null){
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
             return ServerResponse.createByErrorMessage("用户未登录");
         }
         //验证旧密码，验证现在这个要修改密码的用户就是这个用户
-        int resultCount=userMapper.checkPassword(user.getId(),MD5Util.MD5EncodeUtf8(passwordOld));
-        if(resultCount==0){
+        int resultCount = userMapper.checkPassword(user.getId(), MD5Util.MD5EncodeUtf8(passwordOld));
+        if (resultCount == 0) {
             return ServerResponse.createByErrorMessage("用户密码错误");
         }
         user.setPassword(MD5Util.MD5EncodeUtf8(passwordNew));
-        int updateCount= userMapper.updateByPrimaryKeySelective(user);
-        if(updateCount>0){
+        int updateCount = userMapper.updateByPrimaryKeySelective(user);
+        if (updateCount > 0) {
             return ServerResponse.createBySuccessMessage("修改密码成功");
-        }else{
+        } else {
             return ServerResponse.createByErrorMessage("修改密码失败");
         }
     }
 
     /**
      * 更新用户的信息
+     *
      * @param session session对象
-     * @param user User对象
+     * @param user    User对象
      * @return 统一返回对象 String型
      */
     @Override
     public ServerResponse<User> updateUserInformation(HttpSession session, User user) {
-        User currentUser=(User)session.getAttribute(Const.CURRENT_USER);
-        if(currentUser==null){
+        User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
+        if (currentUser == null) {
             return ServerResponse.createByErrorMessage("用户未登录");
         }
-        int resultCount=userMapper.checkEmailIsUsed(currentUser.getId(),user.getEmail());
-        if(resultCount>0){
+        int resultCount = userMapper.checkEmailIsUsed(currentUser.getId(), user.getEmail());
+        if (resultCount > 0) {
             return ServerResponse.createByErrorMessage("该邮箱已经被使用，请使用其他邮箱");
         }
-        User updateUser=new User();
+        User updateUser = new User();
         updateUser.setId(currentUser.getId());
         updateUser.setEmail(user.getEmail());
         updateUser.setPhone(user.getPhone());
         updateUser.setQuestion(user.getQuestion());
         updateUser.setAnswer(user.getAnswer());
 
-        int updateCount=userMapper.updateByPrimaryKeySelective(updateUser);
-        if(updateCount>0){
+        int updateCount = userMapper.updateByPrimaryKeySelective(updateUser);
+        if (updateCount > 0) {
             updateUser.setUsername(currentUser.getUsername());
-            return ServerResponse.createBySuccessMessage("更新成功",updateUser);
+            return ServerResponse.createBySuccessMessage("更新成功", updateUser);
         }
         return ServerResponse.createByErrorMessage("更新失败");
+    }
+
+    /**
+     * 获得当前登录的信息
+     *
+     * @param session session对象
+     * @return 统一返回对象 User型
+     */
+    @Override
+    public ServerResponse<User> getInformation(HttpSession session) {
+        User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
+        if (currentUser == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), "用户未登录,需要登录");
+        }
+        User user = userMapper.selectByPrimaryKey(currentUser.getId());
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("找不到当前的用户");
+        }
+        user.setPassword(StringUtils.EMPTY);
+        return ServerResponse.createBySuccess(user);
+    }
+
+    //backend
+
+    /**
+     * 判断指定的用户是不是管理员
+     * @param user User对象
+     * @return 统一返回对象
+     */
+    @Override
+    public ServerResponse checkAdminRole(User user) {
+        if(user!=null&& user.getRole() ==Const.Role.ROLE_ADMIN){
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
     }
 }

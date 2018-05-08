@@ -154,7 +154,7 @@
 
     <update id="forgetResetPassword" parameterType="map">
         update mmall_user
-        set password = #{password}, update_time = now()
+        set password = #{passwordNew}, update_time = now()
         where username=#{username}
     </update>
 
@@ -165,7 +165,7 @@
     <select id="selectLogin" resultMap="BaseResultMap" parameterType="map">
         select
         <include refid="Base_Column_List"/>
-        from mmall where username= #{username}
+        from mmall_user where username= #{username}
         and password=#{password}
     </select>
 

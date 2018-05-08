@@ -10,19 +10,27 @@ import javax.servlet.http.HttpSession;
  */
 public interface IUserService {
 
+    //portal
+
     ServerResponse<User> login(String username, String password);
 
     ServerResponse<String> register(User user);
 
-    ServerResponse<String> checkValid(String str,String type);
+    ServerResponse<String> checkValid(String str, String type);
 
     ServerResponse<String> getQuestion(String username);
 
-    ServerResponse<String> checkAnswer(String username,String question,String answer);
+    ServerResponse<String> checkAnswer(String username, String question, String answer);
 
     ServerResponse<String> forgetResetPassword(String username, String password, String forgetToken);
 
-    ServerResponse<String> resetPassWord(HttpSession session,String passwordOld,String passwordNew);
+    ServerResponse<String> resetPassWord(HttpSession session, String passwordOld, String passwordNew);
 
-    ServerResponse<User> updateUserInformation(HttpSession session,User user);
+    ServerResponse<User> updateUserInformation(HttpSession session, User user);
+
+    ServerResponse<User> getInformation(HttpSession session);
+
+    //backend
+    ServerResponse checkAdminRole(User user);
+
 }

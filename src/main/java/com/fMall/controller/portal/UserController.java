@@ -19,8 +19,12 @@ import javax.servlet.http.HttpSession;
 @RequestMapping("/user/")
 public class UserController {
 
+    private final IUserService iUserService;
+
     @Autowired
-    private IUserService iUserService;
+    public UserController(IUserService iUserService) {
+        this.iUserService = iUserService;
+    }
 
     /**
      * 用户登录接口
@@ -47,7 +51,7 @@ public class UserController {
      * @param session session对象
      * @return 统一返回对象
      */
-    @RequestMapping(value = "logout.do", method = RequestMethod.GET)
+    @RequestMapping(value = "logout.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> logout(HttpSession session) {
         session.removeAttribute(Const.CURRENT_USER);
@@ -60,7 +64,7 @@ public class UserController {
      * @param user User对象
      * @return 统一返回对象
      */
-    @RequestMapping(value = "register.do", method = RequestMethod.GET)
+    @RequestMapping(value = "register.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> register(User user) {
         return iUserService.register(user);
@@ -73,7 +77,7 @@ public class UserController {
      * @param type 要校验数据的类型
      * @return 统一返回对象
      */
-    @RequestMapping(value = "checkValid.do", method = RequestMethod.GET)
+    @RequestMapping(value = "checkValid.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> checkValid(String str, String type) {
         return iUserService.checkValid(str, type);
@@ -85,7 +89,7 @@ public class UserController {
      * @param session session对象
      * @return 统一返回对象
      */
-    @RequestMapping(value = "get_user_info.do", method = RequestMethod.GET)
+    @RequestMapping(value = "get_user_info.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<User> getUserInfo(HttpSession session) {
         User user = (User) session.getAttribute(Const.CURRENT_USER);
@@ -101,7 +105,7 @@ public class UserController {
      * @param username 用户名
      * @return 统一返回对象 string型 用户设置的问题
      */
-    @RequestMapping(value = "forget_get_question.do", method = RequestMethod.GET)
+    @RequestMapping(value = "forget_get_question.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> forgetGetQuestion(String username) {
         return iUserService.getQuestion(username);
@@ -115,7 +119,7 @@ public class UserController {
      * @param answer   密码
      * @return 统一返回对象 String型
      */
-    @RequestMapping(value = "check_answer.do", method = RequestMethod.GET)
+    @RequestMapping(value = "check_answer.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> forgetCheckAnswer(String username, String question, String answer) {
         return iUserService.checkAnswer(username, question, answer);
@@ -129,7 +133,7 @@ public class UserController {
      * @param forgetToken forgetToken
      * @return 统一返回对象 String型
      */
-    @RequestMapping(value = "forget_reset_password.do", method = RequestMethod.GET)
+    @RequestMapping(value = "forget_reset_password.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> forgetResetPassword(String username, String passwordNew, String forgetToken) {
         return iUserService.forgetResetPassword(username, passwordNew, forgetToken);
@@ -143,7 +147,7 @@ public class UserController {
      * @param passwordNew 新的密码
      * @return
      */
-    @RequestMapping(value = "reset_password.do", method = RequestMethod.GET)
+    @RequestMapping(value = "reset_password.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> resetPassword(HttpSession session, String passwordOld, String passwordNew) {
         return iUserService.resetPassWord(session, passwordOld, passwordNew);
@@ -164,6 +168,17 @@ public class UserController {
             session.setAttribute(Const.CURRENT_USER,response.getData());
         }
         return response;
+    }
+
+    /**
+     * 获取当前用户的信息
+     * @param session Session对象
+     * @return 统一返回对象类型
+     */
+    @RequestMapping(value = "get_information.do",method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse<User> getInformation(HttpSession session){
+        return iUserService.getInformation(session);
     }
 
 }

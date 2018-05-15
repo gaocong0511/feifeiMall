@@ -27,6 +27,24 @@
     from mmall_product
     where id = #{id,jdbcType=INTEGER}
   </select>
+    <select id="getProductList" resultType="com.fMall.pojo.Product">
+      select
+      <include refid="Base_Column_List"/>
+      from mmall_product
+      ORDER BY id asc
+    </select>
+  <select id="getProductByNameAndProductId" resultType="com.fMall.pojo.Product">
+    select
+    <include refid="Base_Column_List"/>
+    <where>
+      <if test="productName != null ">
+        and name like #{productName}
+      </if>
+      <if test="productId != null" >
+        and id=#{productId}
+      </if>
+    </where>
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from mmall_product
     where id = #{id,jdbcType=INTEGER}

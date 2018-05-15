@@ -1,6 +1,9 @@
 package com.fMall.dao;
 
 import com.fMall.pojo.Product;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface ProductMapper {
     int deleteByPrimaryKey(Integer id);
@@ -14,4 +17,8 @@ public interface ProductMapper {
     int updateByPrimaryKeySelective(Product record);
 
     int updateByPrimaryKey(Product record);
+
+    List<Product> getProductList();
+
+    List<Product> getProductByNameAndProductId(@Param("productName")String productName,@Param("productId")Integer productId);
 }

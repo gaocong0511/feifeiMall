@@ -7,6 +7,7 @@ import com.fMall.dao.CategoryMapper;
 import com.fMall.dao.ProductMapper;
 import com.fMall.pojo.Category;
 import com.fMall.pojo.Product;
+import com.fMall.service.ICategoryService;
 import com.fMall.service.IProductService;
 import com.fMall.util.DateTimeUtil;
 import com.fMall.util.PropertiesUtil;
@@ -15,6 +16,7 @@ import com.fMall.vo.ProductListVo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.util.StringUtil;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,11 +32,13 @@ public class ProductServiceImpl implements IProductService {
 
     private final ProductMapper productMapper;
     private final CategoryMapper categoryMapper;
+    private final ICategoryService iCategoryService;
 
     @Autowired
-    public ProductServiceImpl(ProductMapper productMapper, CategoryMapper categoryMapper) {
+    public ProductServiceImpl(ProductMapper productMapper, CategoryMapper categoryMapper,ICategoryService iCategoryService) {
         this.productMapper = productMapper;
         this.categoryMapper = categoryMapper;
+        this.iCategoryService=iCategoryService;
     }
 
     /**
@@ -112,9 +116,7 @@ public class ProductServiceImpl implements IProductService {
         if (product == null) {
             return ServerResponse.createByErrorMessage("产品已经被删除");
         }
-        if (product.getStatus() != Const.ProductStatusEnum.ON_SALE.getCode()) {
-            return ServerResponse.createByErrorMessage("产品已经下架");
-        }
+
         ProductDetailVo productDetailVo = assembleProductDetailVo(product);
         return ServerResponse.createBySuccess(productDetailVo);
     }
@@ -156,7 +158,7 @@ public class ProductServiceImpl implements IProductService {
      * @return 统一返回对象
      */
     @Override
-    public ServerResponse<PageInfo> searchProductByNameAndProductId(String productName, Integer productId, Integer pageNum, Integer pageSize) {
+    public ServerResponse<PageInfo> searchProductByNameAndProductId(String productName, Integer productId, int pageNum, int pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         if (StringUtils.isNotBlank(productName)) {
             productName = new StringBuilder().append("%").append(productName).append("%").toString();
@@ -168,6 +170,93 @@ public class ProductServiceImpl implements IProductService {
             productListVoList.add(productListVo);
         }
         PageInfo pageInfo = new PageInfo(productList);
+        pageInfo.setList(productListVoList);
+        return ServerResponse.createBySuccess(pageInfo);
+    }
+
+    /**
+     * 用户获取产品详细信息的方法实现
+     *
+     * @param productId 商品ID
+     * @return productDetailVo对象
+     */
+    @Override
+    public ServerResponse<ProductDetailVo> getProductDetailForUser(Integer productId) {
+        if (productId == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEAGAL_ARGUMENT.getCode(),
+                    ResponseCode.ILLEAGAL_ARGUMENT.getDesc());
+        }
+        Product product = productMapper.selectByPrimaryKey(productId);
+        if (product == null) {
+            return ServerResponse.createByErrorMessage("产品已经被删除");
+        }
+        if (product.getStatus() != Const.ProductStatusEnum.ON_SALE.getCode()) {
+            return ServerResponse.createByErrorMessage("产品已经下架");
+        }
+        ProductDetailVo productDetailVo = assembleProductDetailVo(product);
+        return ServerResponse.createBySuccess(productDetailVo);
+    }
+
+    /**
+     * 用户根据关键词或者品类来分页获取商品
+     *
+     * @param keyword    商品关键词
+     * @param categoryId 品类ID
+     * @param pageNum    页码数
+     * @param pageSize   每页的商品数量
+     * @param orderBy    排序规则
+     * @return 获取到的一页商品
+     */
+    @Override
+    public ServerResponse<PageInfo> getProductByKeyWordCategory(String keyword, Integer categoryId, int pageNum, int pageSize, String orderBy) {
+        if(StringUtils.isBlank(keyword)&&categoryId==null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEAGAL_ARGUMENT.getCode(),ResponseCode.
+                    ILLEAGAL_ARGUMENT.getDesc());
+        }
+
+        List<Integer> categoryIdList=new ArrayList<>();
+
+        //首先获取所有的子品类
+        if(categoryId!=null){
+            Category category=categoryMapper.selectByPrimaryKey(categoryId);
+            if(category==null&&StringUtils.isBlank(keyword)){
+                //没有查询到具体的分类，并且传入的关键词是没有的，返回空的结果
+                PageHelper.startPage(pageNum,pageSize);
+                List<ProductListVo> productListVoList =Lists.newArrayList();
+                PageInfo pageInfo=new PageInfo(productListVoList);
+                return ServerResponse.createBySuccess(pageInfo);
+            }
+            //如果成功的查询到该品类了
+            categoryIdList=iCategoryService.getChildrenAndDeepChildrenById(category.getId()).getData();
+            if(categoryIdList.size()==0){
+                categoryIdList=null;
+            }
+        }
+
+        //给keyWord添加%
+        if(StringUtils.isNotBlank(keyword)){
+            keyword=new StringBuilder().append("%").append(keyword).append("%").toString();
+        }else {
+            keyword=null;
+        }
+
+        PageHelper.startPage(pageNum,pageSize);
+        //排序处理
+        if(StringUtils.isNotBlank(orderBy)){
+            if(Const.ProductListOrderBy.PRICE_ASC_DESC.contains(orderBy)){
+                String orderByArray[]=orderBy.split("_");
+                PageHelper.orderBy(orderByArray[0]+" "+orderByArray[1]);
+            }
+        }
+
+        List<Product> productList=productMapper.getProductByNameAndCategoryIds(keyword,categoryIdList);
+
+        List<ProductListVo> productListVoList=Lists.newArrayList();
+        for(Product product:productList){
+            ProductListVo productListVo=assembleProductListVo(product);
+            productListVoList.add(productListVo);
+        }
+        PageInfo pageInfo=new PageInfo(productList);
         pageInfo.setList(productListVoList);
         return ServerResponse.createBySuccess(pageInfo);
     }

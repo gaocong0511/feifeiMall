@@ -42,7 +42,7 @@ public class ProductController {
      *
      * @param keyWord    关键词
      * @param categoryId 品类Id
-     * @param pageNum    页码
+     * @param pageNum    页码2
      * @param pageSize   每页含有的商品数量
      * @param orderBy    排序方式
      * @return 用户查询到的一页的商品

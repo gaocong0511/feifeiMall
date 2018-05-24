@@ -16,6 +16,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.List;
 /**
  * Created by 高琮 on 2018/05/19
  */
+@Service("iCartService")
 public class CartServiceImpl implements ICartService {
 
     private final CartMapper cartMapper;
@@ -87,7 +89,7 @@ public class CartServiceImpl implements ICartService {
      * @param userId    用户的ID
      * @param productId 商品的ID
      * @param count     要更新商品的数量
-     * @return
+     * @return 购物车的vo对象
      */
     @Override
     public ServerResponse<CartVo> update(Integer userId, Integer productId, Integer count) {
@@ -125,7 +127,7 @@ public class CartServiceImpl implements ICartService {
      * @param userId    用户的ID
      * @param productId 商品的ID
      * @param checked   选中还是不选中该商品
-     * @return
+     * @return 购物车的vo对象
      */
     @Override
     public ServerResponse<CartVo> selectOrUnSelect(Integer userId, Integer productId, Integer checked) {
@@ -176,7 +178,7 @@ public class CartServiceImpl implements ICartService {
                     cartProductVo.setProductStock(product.getStock());
 
                     //判断当前的购物车之中的数量是不是够
-                    int maxCountCanBuy = 0;
+                    int maxCountCanBuy;
                     if (product.getStock() >= cartItem.getQuantity()) {
                         //目前的余量还是足够的
                         maxCountCanBuy = cartItem.getQuantity();

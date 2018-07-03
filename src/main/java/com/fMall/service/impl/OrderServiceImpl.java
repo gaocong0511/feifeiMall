@@ -10,13 +10,17 @@ import com.alipay.demo.trade.model.result.AlipayF2FPrecreateResult;
 import com.alipay.demo.trade.service.AlipayTradeService;
 import com.alipay.demo.trade.service.impl.AlipayTradeServiceImpl;
 import com.alipay.demo.trade.utils.ZxingUtils;
+import com.fMall.common.Const;
 import com.fMall.common.ServerResponse;
 import com.fMall.dao.OrderItemMapper;
 import com.fMall.dao.OrderMapper;
+import com.fMall.dao.PayInfoMapper;
 import com.fMall.pojo.Order;
 import com.fMall.pojo.OrderItem;
+import com.fMall.pojo.PayInfo;
 import com.fMall.service.IOrderService;
 import com.fMall.util.BigDecimalUtil;
+import com.fMall.util.DateTimeUtil;
 import com.fMall.util.FTPUtil;
 import com.fMall.util.PropertiesUtil;
 import com.google.common.collect.Lists;
@@ -40,12 +44,14 @@ import java.util.Map;
 public class OrderServiceImpl implements IOrderService {
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
+    private final PayInfoMapper payInfoMapper;
     private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     @Autowired
-    public OrderServiceImpl(OrderMapper orderMapper, OrderItemMapper orderItemMapper) {
+    public OrderServiceImpl(OrderMapper orderMapper, OrderItemMapper orderItemMapper,PayInfoMapper payInfoMapper) {
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
+        this.payInfoMapper=payInfoMapper;
     }
 
     private static AlipayTradeService tradeService;
@@ -179,4 +185,55 @@ public class OrderServiceImpl implements IOrderService {
             int a;
         }
     }
+
+    /**
+     *处理支付宝回调  回写订单
+     * @param params 支付宝返回的参数
+     * @return 统一返回对象
+     */
+    @Override
+    public ServerResponse aliCallBack(Map<String,String> params){
+        Long orderNo=Long.parseLong(params.get("out_trade_no"));
+        String tradeNo=params.get("trade_no");
+        String tradeStatus=params.get("trade_status");
+
+        Order order=orderMapper.selectByOrderNo(orderNo);
+        if(order==null){
+            return ServerResponse.createByErrorMessage("对不起，没有找到相关订单");
+        }
+        if(order.getStatus()>= Const.OrderStatusEnum.PAID.getCode()){
+            return ServerResponse.createBySuccessMessage("支付宝重复调用");
+        }
+        if(Const.AlipayCallBack.TRADE_STATUS_TRADE_SUCCESS.equals(tradeStatus)){
+            order.setPaymentTime(DateTimeUtil.strToDate(params.get("gmt_payment")));
+            order.setStatus(Const.OrderStatusEnum.PAID.getCode());
+            orderMapper.updateByPrimaryKeySelective(order);
+        }
+
+        //保存一条支付信息
+        PayInfo payInfo=new PayInfo();
+        payInfo.setUserId(order.getUserId());
+        payInfo.setOrderNo(order.getOrderNo());
+        payInfo.setPayPlatform(Const.PayPlatformEnum.ALIPAY.getCode());
+        payInfo.setPlatformNumber(tradeNo);
+        payInfo.setPlatformStatus(tradeStatus);
+        payInfoMapper.insert(payInfo);
+        return ServerResponse.createBySuccess();
+    }
+
+    @Override
+    public ServerResponse queryOrderPayStatus(Integer userId, long orderNo) {
+        Order order=orderMapper.selectByUserIdAndOrderNo(userId,orderNo);
+        if(order==null){
+            return ServerResponse.createByErrorMessage("没有查询到该订单");
+        }
+
+        if(order.getStatus()>= Const.OrderStatusEnum.PAID.getCode()){
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
+
+    }
+
+
 }

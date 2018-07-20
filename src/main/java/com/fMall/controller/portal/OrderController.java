@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +37,40 @@ public class OrderController {
         this.iOrderService = iOrderService;
     }
 
+
+    /**
+     * 新创建一个订单
+     * @param session
+     * @param shippingId
+     * @return
+     */
+    @RequestMapping(value = "create.do",method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse create(HttpSession session,Integer shippingId) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.createOrder( user.getId(),shippingId);
+    }
+
+
+    /**
+     * 取消订单
+     * @param session
+     * @param orderNo
+     * @return
+     */
+    @RequestMapping(value = "cancel.do",method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse cancel(HttpSession session,Long orderNo) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.cancel( user.getId(), orderNo);
+    }
+
     /**
      * 支付入口
      *
@@ -43,7 +78,7 @@ public class OrderController {
      * @param orderNumber 订单号
      * @return 统一返回对象
      */
-    @RequestMapping("pay.do")
+    @RequestMapping(value = "pay.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse pay(HttpSession session, Long orderNumber, HttpServletRequest request) {
         User user = (User) session.getAttribute(Const.CURRENT_USER);
@@ -55,7 +90,7 @@ public class OrderController {
     }
 
 
-    @RequestMapping("ali_pay_callback.do")
+    @RequestMapping(value="ali_pay_callback.do",method = RequestMethod.POST)
     @ResponseBody
     /**
      * 支付宝回调的入口
@@ -100,7 +135,7 @@ public class OrderController {
      * @param orderNumber 订单号
      * @return 统一返回对象
      */
-    @RequestMapping("query_order_pay_status.do")
+    @RequestMapping(value="query_order_pay_status.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse queryOrderPayStatus(HttpSession session, Long orderNumber, HttpServletRequest request) {
         User user = (User) session.getAttribute(Const.CURRENT_USER);

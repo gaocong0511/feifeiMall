@@ -75,6 +75,15 @@ public class Const {
         public String getValue() {
             return value;
         }
+
+        public static OrderStatusEnum codeOf(int code) {
+            for (OrderStatusEnum orderStatusEnum : values()) {
+                if (orderStatusEnum.getCode() == code) {
+                    return orderStatusEnum;
+                }
+            }
+            throw new RuntimeException("没有找到对应的枚举");
+        }
     }
 
     /**
@@ -90,8 +99,8 @@ public class Const {
     /**
      * 支付方式的枚举类
      */
-    public enum PayPlatformEnum{
-        ALIPAY(1,"支付宝");
+    public enum PayPlatformEnum {
+        ALIPAY(1, "支付宝");
         private int code;
         private String value;
 
@@ -108,5 +117,43 @@ public class Const {
             return value;
         }
     }
+
+    /**
+     * 支付类型的枚举
+     */
+    public enum PaymentTypeEnum {
+        ONLINEPAY(1, "在线支付");
+        private int code;
+        private String value;
+
+        PaymentTypeEnum(int code, String value) {
+            this.code = code;
+            this.value = value;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * 根据传入的编号获取一下对应的枚举的类别
+         *
+         * @param code
+         * @return
+         */
+        public static PaymentTypeEnum codeOf(int code) {
+            for (PaymentTypeEnum paymentTypeEnum : values()) {
+                if (paymentTypeEnum.getCode() == code) {
+                    return paymentTypeEnum;
+                }
+            }
+            throw new RuntimeException("没有找到对应的枚举");
+        }
+    }
+
 
 }

@@ -1,7 +1,11 @@
 package com.fMall.dao;
 
 import com.fMall.pojo.Order;
+import com.fMall.pojo.OrderItem;
+import jdk.internal.dynalink.linker.LinkerServices;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface OrderMapper {
     int deleteByPrimaryKey(Integer id);
@@ -19,4 +23,5 @@ public interface OrderMapper {
     Order selectByUserIdAndOrderNo(@Param("userId") Integer userId,@Param("orderNo") Long orderNo);
 
     Order selectByOrderNo(Long orderNo);
+
 }

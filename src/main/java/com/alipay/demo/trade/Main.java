@@ -75,7 +75,7 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         Main main = new Main();
 
         // 系统商商测试交易保障接口api
@@ -98,7 +98,7 @@ public class Main {
 
         // 测试当面付2.0生成支付二维码
         main.test_trade_precreate();
-    }
+    }*/
 
     // 测试系统商交易保障调度
     public void test_monitor_schedule_logic() {

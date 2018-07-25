@@ -1,6 +1,9 @@
 package com.fMall.service;
 
 import com.fMall.common.ServerResponse;
+import com.fMall.vo.OrderVo;
+import com.github.pagehelper.PageInfo;
+import com.mysql.fabric.Server;
 
 import java.util.Map;
 
@@ -17,4 +20,18 @@ public interface IOrderService {
     ServerResponse createOrder(Integer userId, Integer shippingId);
 
     ServerResponse<String> cancel(Integer userId,long orderNo);
+
+    ServerResponse getOrderCartProduct(Integer userId);
+
+    ServerResponse<PageInfo> getOrderList(Integer userId,int pageNum,int pageSize);
+
+
+    //后台管理员的订单
+    ServerResponse<PageInfo> manageList(int pageNum,int pageSize);
+
+    ServerResponse<OrderVo> manageDetail(Long orderNo);
+
+    ServerResponse<PageInfo>manageSerach(Long orderNo,int pageNum,int pageSize);
+
+    ServerResponse<String> mangeSendGoods(Long orderNo);
 }

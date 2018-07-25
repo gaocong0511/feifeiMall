@@ -45,6 +45,21 @@
         where order_no=#{orderNo}
     </select>
 
+    <select id="selectByUserId" resultType="com.fMall.pojo.Order">
+        select
+            <include refid="Base_Column_List"/>
+        from mmall_order
+        where user_id=#{userId}
+        order by  create_time desc 
+    </select>
+    
+    <select id="selectAllOrder" resultMap="BaseResultMap">
+        select
+            <include refid="Base_Column_List"/>
+        from mmall_order
+        ORDER BY create_time desc
+    </select>
+
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
         delete from mmall_order

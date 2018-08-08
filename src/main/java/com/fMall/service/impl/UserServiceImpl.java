@@ -148,7 +148,7 @@ public class UserServiceImpl implements IUserService {
             //用uuid生成一个forgetToken并且设置其有效期
             String forgetToken = UUID.randomUUID().toString();
             TokenCache.setKey(TokenCache.TOKEN_PREFIX + username, forgetToken);
-            return ServerResponse.createBySuccessMessage(forgetToken);
+            return ServerResponse.createBySuccess(forgetToken);
         }
         return ServerResponse.createByErrorMessage("输入答案错误");
     }

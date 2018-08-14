@@ -249,7 +249,7 @@ public class ProductServiceImpl implements IProductService {
             }
         }
 
-        List<Product> productList=productMapper.getProductByNameAndCategoryIds(keyword,categoryIdList);
+        List<Product> productList=productMapper.getProductByNameAndCategoryIds(StringUtils.isBlank(keyword)?null:keyword,categoryIdList.size()==0?null:categoryIdList);
 
         List<ProductListVo> productListVoList=Lists.newArrayList();
         for(Product product:productList){

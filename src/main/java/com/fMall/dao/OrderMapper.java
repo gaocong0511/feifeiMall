@@ -1,8 +1,6 @@
 package com.fMall.dao;
 
 import com.fMall.pojo.Order;
-import com.fMall.pojo.OrderItem;
-import jdk.internal.dynalink.linker.LinkerServices;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

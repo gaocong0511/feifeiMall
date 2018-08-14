@@ -120,7 +120,7 @@ public class OrderManageController {
 
         }
         if (iUserService.checkAdminRole(user).isSuccess()) {
-            //填充我们增加产品的业务逻辑
+
             return iOrderService.mangeSendGoods(orderNo);
         } else {
             return ServerResponse.createByErrorMessage("无权限操作");

@@ -29,7 +29,7 @@
         WHERE user_id=#{userId}
         and product_id=#{productId}
     </select>
-    <select id="selectCartByUserId" resultType="com.fMall.pojo.Cart">
+    <select id="selectCartByUserId" resultMap="BaseResultMap" parameterType="int">
         select
         <include refid="Base_Column_List"/>
         from mmall_cart
@@ -68,8 +68,8 @@
                                 quantity, checked, create_time,
                                 update_time)
         values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER},
-                #{quantity,jdbcType=INTEGER}, #{checked,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
-                #{updateTime,jdbcType=TIMESTAMP})
+                #{quantity,jdbcType=INTEGER}, #{checked,jdbcType=INTEGER}, now(),
+                now())
     </insert>
     <insert id="insertSelective" parameterType="com.fMall.pojo.Cart">
         insert into mmall_cart

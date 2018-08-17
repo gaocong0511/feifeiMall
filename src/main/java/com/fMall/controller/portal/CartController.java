@@ -66,6 +66,23 @@ public class CartController {
     }
 
     /**
+     * 更新当前购物车中某件商品的数量
+     * @param session HttpSession对象
+     * @param productId 商品的ID
+     * @param count 商品当前的数量
+     * @return 统一返回对象 CartVo类型
+     */
+    @RequestMapping("update.do")
+    @ResponseBody
+    public ServerResponse<CartVo> update(HttpSession session,Integer productId,Integer count){
+        User user=(User)session.getAttribute(Const.CURRENT_USER);
+        if(user==null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iCartService.update(user.getId(),productId,count);
+    }
+
+    /**
      * 从当前的购物车之中删除一个商品
      *
      * @param session    HTTPSession对象

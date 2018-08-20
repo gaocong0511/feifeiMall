@@ -453,7 +453,7 @@ public class OrderServiceImpl implements IOrderService {
         for (Cart cartItem : cartList) {
             OrderItem orderItem = new OrderItem();
             Product product = productMapper.selectByPrimaryKey(cartItem.getProductId());
-            if (Const.ProductStatusEnum.ON_SALE.getCode() != product.getStock()) {
+            if (Const.ProductStatusEnum.ON_SALE.getCode() != product.getStatus()) {
                 //产品不是在售卖状态
                 return ServerResponse.createByErrorMessage("产品" + product.getName() + "不是在线售卖状态");
             }

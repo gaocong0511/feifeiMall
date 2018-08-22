@@ -42,9 +42,9 @@ public class OrderController {
     /**
      * 新创建一个订单
      *
-     * @param session
-     * @param shippingId
-     * @return
+     * @param session 当前的会话信息
+     * @param shippingId 收货地址Id
+     * @return  统一返回对象
      */
     @RequestMapping(value = "create.do", method = RequestMethod.POST)
     @ResponseBody
@@ -60,9 +60,9 @@ public class OrderController {
     /**
      * 取消订单
      *
-     * @param session
-     * @param orderNo
-     * @return
+     * @param session 当前的会话信息
+     * @param orderNo 订单编号
+     * @return 统一返回对象
      */
     @RequestMapping(value = "cancel.do", method = RequestMethod.POST)
     @ResponseBody
@@ -99,11 +99,17 @@ public class OrderController {
      * @param pageSize 要查询的页容量
      * @return 统一返回对象
      */
+    @RequestMapping(value = "list.do", method = RequestMethod.POST)
+    @ResponseBody
     public ServerResponse list(HttpSession session,
                                @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
                                @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
-        return null;
-
+        User user=(User)session.getAttribute(Const.CURRENT_USER);
+        if(user==null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),
+                    ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.getOrderList(user.getId(),pageNum,pageSize);
     }
 
     /**

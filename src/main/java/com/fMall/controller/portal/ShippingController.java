@@ -67,7 +67,7 @@ public class ShippingController {
      * @param shipping 收货地址
      * @return 统一返回对象
      */
-    @RequestMapping("update.do")
+    @RequestMapping(value ="update.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse update(HttpSession session,Shipping shipping){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
@@ -84,7 +84,7 @@ public class ShippingController {
      * @param shippingId 收货地址的ID
      * @return 统一返回对象
      */
-    @RequestMapping("select.do")
+    @RequestMapping(value ="select.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<Shipping> select(HttpSession session,Integer shippingId){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
@@ -102,7 +102,7 @@ public class ShippingController {
      * @param session HTTPSession对象
      * @return 统一返回对象
      */
-    @RequestMapping("list.do")
+    @RequestMapping(value ="list.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<PageInfo> list(@RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                          @RequestParam(value = "pageSize",defaultValue = "10")int pageSize,

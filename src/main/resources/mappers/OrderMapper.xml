@@ -45,7 +45,7 @@
         where order_no=#{orderNo}
     </select>
 
-    <select id="selectByUserId" resultType="com.fMall.pojo.Order">
+    <select id="selectByUserId" resultMap="BaseResultMap">
         select
             <include refid="Base_Column_List"/>
         from mmall_order

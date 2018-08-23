@@ -409,7 +409,7 @@ public class OrderServiceImpl implements IOrderService {
         order.setPostage(0);
         order.setPaymentType(Const.PaymentTypeEnum.ONLINEPAY.getCode());
         order.setPayment(payment);
-        order.setId(userId);
+        order.setUserId(userId);
         order.setShippingId(shippingId);
         return order;
 

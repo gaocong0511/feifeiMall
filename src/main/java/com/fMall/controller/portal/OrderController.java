@@ -9,6 +9,7 @@ import com.fMall.common.ServerResponse;
 import com.fMall.pojo.User;
 import com.fMall.service.IOrderService;
 import com.google.common.collect.Maps;
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +111,17 @@ public class OrderController {
                     ResponseCode.NEED_LOGIN.getDesc());
         }
         return iOrderService.getOrderList(user.getId(),pageNum,pageSize);
+    }
+
+    @RequestMapping(value = "detail.do", method = RequestMethod.POST)
+    @ResponseBody
+    public ServerResponse detail(HttpSession session,Long orderNo){
+        User user=(User)session.getAttribute(Const.CURRENT_USER);
+        if(user==null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),
+                    ResponseCode.NEED_LOGIN.getDesc());
+        }
+        return iOrderService.getOrderDetail(user.getId(),orderNo);
     }
 
     /**

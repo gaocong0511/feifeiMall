@@ -25,6 +25,8 @@ public interface IOrderService {
 
     ServerResponse<PageInfo> getOrderList(Integer userId,int pageNum,int pageSize);
 
+    ServerResponse<OrderVo> getOrderDetail(Integer userId,Long orderNo);
+
 
     //后台管理员的订单
     ServerResponse<PageInfo> manageList(int pageNum,int pageSize);

@@ -185,6 +185,24 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     /**
+     * 获得指定订单的详细信息
+     *
+     * @param userId  用户ID
+     * @param orderNo 订单编号
+     * @return 统一返回对象
+     */
+    @Override
+    public ServerResponse<OrderVo> getOrderDetail(Integer userId, Long orderNo) {
+        Order order=orderMapper.selectByUserIdAndOrderNo(userId, orderNo);
+        if(order!=null){
+            List<OrderItem> orderItemList =orderItemMapper.getByOrderNoAndUserId(orderNo,userId);
+            OrderVo orderVo=assembleOrderVo(order,orderItemList);
+            return ServerResponse.createBySuccess(orderVo);
+        }
+        return ServerResponse.createByErrorMessage("没有找到相应的订单");
+    }
+
+    /**
      * 管理员获取订单的列表
      *
      * @param pageNum  页数
@@ -316,7 +334,7 @@ public class OrderServiceImpl implements IOrderService {
      *
      * @param order         Order对象
      * @param orderItemList 订单明细的集合
-     * @return Order转换为的ordervo对象
+     * @return Order转换为的orderVo对象
      */
     private OrderVo assembleOrderVo(Order order, List<OrderItem> orderItemList) {
         OrderVo orderVo = new OrderVo();
@@ -389,7 +407,7 @@ public class OrderServiceImpl implements IOrderService {
         shippingVo.setReceiverDistrict(shipping.getReceiverDistrict());
         shippingVo.setReceiverMobile(shipping.getReceiverMobile());
         shippingVo.setReceiverZip(shipping.getReceiverZip());
-        shippingVo.setReceiverPhone(shippingVo.getReceiverPhone());
+        shippingVo.setReceiverPhone(shipping.getReceiverPhone());
         return shippingVo;
     }
 

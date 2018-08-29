@@ -35,7 +35,7 @@
         and user_id=#{userId}
     </select>
 
-    <select id="getByOrderNo" resultType="com.fMall.pojo.OrderItem">
+    <select id="getByOrderNo" parameterType="map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from mmall_order_item
